@@ -1,0 +1,18 @@
+<header>
+  <nav>
+    <a [routerLink]="[UrlConstants.private.index.url]">Home</a>
+    <a [routerLink]="[UrlConstants.private.index.about.url]">About</a>
+    <a [routerLink]="[UrlConstants.private.index.users.url]">Users</a>
+  </nav>
+</header>
+<main>
+  <h1>Hello from {{title}}!</h1>
+
+  <!-- Images (and assets) are parsed and loaded from within the public directory -->
+  <img src="/img/angular.png">
+
+  <router-outlet></router-outlet>
+</main>
+<footer>
+  <a [href]="url">Webpack Angular 2 Starter</a>
+</footer>
