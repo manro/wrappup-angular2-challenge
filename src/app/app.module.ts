@@ -9,10 +9,11 @@ import { removeNgStyles, createNewHosts } from '@angularclass/hmr';
 import { AppComponent } from './app.component';
 
 import { AppConstantsModule } from './constants/_constants.module';
-import { AppModelsModule } from './models/_models.module';
-import { AppServicesModule } from './services/_services.module';
 import { routing } from './app.routing';
-import { AppViewsModule } from  './views/_views.module';
+import { RecordingService } from './services/recording/recording.service';
+import { Utils } from './services/utils/utils';
+import { WindowRef } from './services/utils/windowRef';
+import { RecordingComponent } from './views/recording/recording.component';
 
 
 @NgModule({
@@ -23,20 +24,20 @@ import { AppViewsModule } from  './views/_views.module';
 
       //index-modules
       AppConstantsModule,
-      AppModelsModule,
-      AppServicesModule,
-
-      //views
-      AppViewsModule,
 
       //routes-module
-      routing
+      routing,
   ],
   declarations: [
       AppComponent,
+      RecordingComponent
   ],
   providers: [
-
+      //services
+      RecordingService,
+      Utils,
+      //native objects
+      WindowRef,
   ],
   bootstrap: [ AppComponent ]
 })

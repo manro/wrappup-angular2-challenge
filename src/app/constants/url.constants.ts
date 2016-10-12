@@ -7,13 +7,6 @@ export let UrlConstants:any = {
     private: {
         index: {
             url: '',
-
-            about: {
-                url: 'about'
-            },
-            users: {
-                url: 'users'
-            }
         }
     }
 };

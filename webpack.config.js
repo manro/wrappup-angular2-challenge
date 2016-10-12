@@ -143,16 +143,6 @@ module.exports = function makeWebpackConfig() {
     postLoaders: []
   };
 
-  if (isTest && !isTestWatch) {
-    // instrument only testing sources with Istanbul, covers ts files
-    config.module.postLoaders.push({
-      test: /\.ts$/,
-      include: path.resolve('src'),
-      loader: 'istanbul-instrumenter-loader',
-      exclude: [/node_modules/]
-    });
-  }
-
   /**
    * Plugins
    * Reference: http://webpack.github.io/docs/configuration.html#plugins

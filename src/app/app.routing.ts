@@ -1,13 +1,9 @@
-import { HomeComponent } from './views/recording/recording.component';
-import { AboutComponent } from './views/about/about.component';
-import { UsersComponent } from './views/users/users.component';
+import { RecordingComponent } from './views/recording/recording.component';
 import { Routes, RouterModule } from '@angular/router';
 
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'about', component: AboutComponent},
-  { path: 'users', component: UsersComponent}
+  { path: '', component: RecordingComponent }
 ];
 
 export const routing = RouterModule.forRoot(routes);
