@@ -1,80 +1,10 @@
 import { Injectable, Inject } from '@angular/core';
-import { WindowRef } from '../utils/windowRef';
 import { Observable } from 'rxjs';
+
+import { WindowRef } from '../utils/windowRef';
 import { Utils } from '../utils/utils';
-
-/* From the spec: This value controls how frequently the audioprocess event is
- dispatched and how many sample-frames need to be processed each call.
- Lower values for buffer size will result in a lower (better) latency.
- Higher values will be necessary to avoid audio breakup and glitches */
-let bufferSize = 2048;
-
-
-class CurrentRecording {
-
-    private _recording = true;
-
-
-    stream = null;
-    leftchannel = [];
-    rightchannel = [];
-    recorder = null;
-    recordingLength = 0;
-    sampleRate = null;
-    context = null;
-
-    stateObserver: Observable<any> = null;
-
-    constructor(_window: any, stream: any) {
-
-        this.stream = stream;
-
-        // creates the audio context
-        let audioContext = _window.AudioContext || _window.webkitAudioContext;
-        this.context = new audioContext();
-
-        // we query the context sample rate (varies depending on platforms)
-        this.sampleRate = this.context.sampleRate;
-
-        // creates a gain node
-        let volume = this.context.createGain();
-
-        // creates an audio node from the microphone incoming stream
-        let audioInput = this.context.createMediaStreamSource(stream);
-
-        // connect the stream to the gain node
-        audioInput.connect(volume);
-
-        this.recorder = this.context.createScriptProcessor(bufferSize, 2, 2);
-
-        this.stateObserver = new Observable(observer => {
-            this.recorder.onaudioprocess = (e) => {
-                if (!this._recording) {
-                    return;
-                }
-
-                let left = e.inputBuffer.getChannelData(0);
-                let right = e.inputBuffer.getChannelData(1);
-
-                // we clone the samples
-                this.leftchannel.push(new Float32Array(left));
-                this.rightchannel.push(new Float32Array(right));
-                this.recordingLength += bufferSize;
-
-                observer.next(this.recordingLength)
-            };
-        });
-
-        // we connect the recorder
-        volume.connect(this.recorder);
-
-        this.recorder.connect(this.context.destination);
-    }
-
-    set recording(val: boolean) {
-        this._recording = !!val;
-    }
-}
+import { RawRecordFactory } from '../../models/raw-record.factory';
+import { ProcessedRecordFactory } from '../../models/processed-record.factory';
 
 @Injectable()
 export class RecordingService {
@@ -83,7 +13,11 @@ export class RecordingService {
 
     private _recordingInProgress = false;
 
-    constructor(@Inject(WindowRef) private _windowRef: WindowRef) {
+    constructor(
+        @Inject(WindowRef) private _windowRef: WindowRef,
+        @Inject(RawRecordFactory) private _rawRecordFactory: RawRecordFactory,
+        @Inject(ProcessedRecordFactory) private _processedRecordFactory: ProcessedRecordFactory
+    ) {
         this._configureMediaStream();
         this._configureGetUserMedia();
     }
@@ -108,7 +42,7 @@ export class RecordingService {
             navigator.getUserMedia({ audio: true },
                 (stream) => {
 
-                    this._currentRawRecord = new CurrentRecording(_window, stream);
+                    this._currentRawRecord = this._rawRecordFactory.create(stream);
 
                     this._currentRawRecord.stateObserver.subscribe((length) => {
                         //send time status
@@ -189,7 +123,7 @@ export class RecordingService {
 
                 observer.next({
                     status: 'done',
-                    payload: base64AudioData
+                    payload: this._processedRecordFactory.create() //base64AudioData
                 });
 
                 this._currentRawRecord.stream.stop();

@@ -1,5 +1,34 @@
-<div class="recording-bookmark">
-    <textarea rows="5" #textarea>
+<div class="recording-bookmark clearfix">
+    <textarea rows="5" #textarea [(ngModel)]="text">
 
     </textarea>
+    <hr/>
+
+    <div class="bookmark-types">
+        <label for="Note">
+            <input type="checkbox" id="Note"/>
+            <span>
+                Note
+            </span>
+        </label>
+
+        <label for="Action">
+            <input type="checkbox" id="Action"/>
+            <span>
+                Action
+            </span>
+        </label>
+
+        <label for="Desision">
+            <input type="checkbox" id="Desision"/>
+            <span>
+                Desision
+            </span>
+        </label>
+    </div>
+
+    <div class="bookmark-controls">
+        <button class="cancel">Cancel</button>
+        <button class="save">Save</button>
+    </div>
 </div>

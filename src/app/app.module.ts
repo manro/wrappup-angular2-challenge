@@ -16,6 +16,9 @@ import { WindowRef } from './services/utils/windowRef';
 import { RecordingComponent } from './views/recording/recording.component';
 import { BookmarkComponent } from './components/bookmark.component';
 
+import { RawRecordFactory } from './models/raw-record.factory';
+import { ProcessedRecordFactory } from './models/processed-record.factory';
+
 
 @NgModule({
   imports: [
@@ -38,6 +41,10 @@ import { BookmarkComponent } from './components/bookmark.component';
       //services
       RecordingService,
       Utils,
+      //models
+      RawRecordFactory,
+      ProcessedRecordFactory,
+
       //native objects
       WindowRef,
   ],

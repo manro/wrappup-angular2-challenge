@@ -74,6 +74,7 @@ export class Utils {
             result[index++] = rightChannel[inputIndex];
             inputIndex++;
         }
+
         return result;
     }
 

@@ -17,4 +17,6 @@ export class BookmarkComponent implements OnInit {
         this.textarea.nativeElement.focus();
     }
 
+    text: string = null;
+
 }
