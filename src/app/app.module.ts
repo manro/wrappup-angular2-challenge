@@ -14,6 +14,7 @@ import { RecordingService } from './services/recording/recording.service';
 import { Utils } from './services/utils/utils';
 import { WindowRef } from './services/utils/windowRef';
 import { RecordingComponent } from './views/recording/recording.component';
+import { BookmarkComponent } from './components/bookmark.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { RecordingComponent } from './views/recording/recording.component';
   ],
   declarations: [
       AppComponent,
-      RecordingComponent
+      RecordingComponent,
+      BookmarkComponent
   ],
   providers: [
       //services

@@ -8,8 +8,15 @@
         </span>
 
     </button>
+    <button class="bookmark-btn" (click)="addBookmark()" *ngIf="recording && !bookmarking">
+
+        <span class="icon-plus"></span>
+
+    </button>
 
     <div class="record-time">
-        <span>00:00:000</span>
+        <span>{{time}}</span>
     </div>
+
+    <wu-bookmark *ngIf="bookmarking"></wu-bookmark>
 </div>

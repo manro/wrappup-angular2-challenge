@@ -61,8 +61,6 @@ class CurrentRecording {
                 this.rightchannel.push(new Float32Array(right));
                 this.recordingLength += bufferSize;
 
-                console.log(this.recordingLength);
-
                 observer.next(this.recordingLength)
             };
         });
@@ -84,9 +82,6 @@ export class RecordingService {
     private _currentRawRecord: any = null;
 
     private _recordingInProgress = false;
-
-    private _currentRecordLength = 0;
-
 
     constructor(@Inject(WindowRef) private _windowRef: WindowRef) {
         this._configureMediaStream();
@@ -110,19 +105,23 @@ export class RecordingService {
 
         return new Observable(observer => {
 
-            navigator.getUserMedia({ audio: true }, (stream) => {
+            navigator.getUserMedia({ audio: true },
+                (stream) => {
 
-                this._currentRawRecord = new CurrentRecording(_window, stream);
+                    this._currentRawRecord = new CurrentRecording(_window, stream);
 
-                this._currentRawRecord.stateObserver.subscribe((length) => {
-                    debugger;
+                    this._currentRawRecord.stateObserver.subscribe((length) => {
+                        //send time status
+                        observer.next({
+                            status: 'recording',
+                            payload: length
+                        });
+
+                    });
+                }, () => {
+                    this._recordingInProgress = false;
+                    observer.error();
                 });
-
-                observer.next();
-            }, () => {
-                this._recordingInProgress = false;
-                observer.error();
-            });
 
         });
     }
@@ -131,6 +130,8 @@ export class RecordingService {
         this._recordingInProgress = false;
 
         return new Observable(observer => {
+
+            console.time('process');
 
             // we flat the left and right channels down
             let leftBuffer = Utils.mergeBuffers(this._currentRawRecord.leftchannel, this._currentRawRecord.recordingLength);
@@ -184,7 +185,12 @@ export class RecordingService {
 
                 let base64AudioData = reader.result;
 
-                observer.next(base64AudioData);
+                console.timeEnd('process');
+
+                observer.next({
+                    status: 'done',
+                    payload: base64AudioData
+                });
 
                 this._currentRawRecord.stream.stop();
                 this._currentRawRecord.stream = null;
