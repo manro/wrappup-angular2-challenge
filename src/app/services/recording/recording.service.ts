@@ -13,6 +13,8 @@ export class RecordingService {
 
     private _recordingInProgress = false;
 
+    private _audioContext = null;
+
     constructor(
         @Inject(WindowRef) private _windowRef: WindowRef,
         @Inject(RawRecordFactory) private _rawRecordFactory: RawRecordFactory,
@@ -20,6 +22,12 @@ export class RecordingService {
     ) {
         this._configureMediaStream();
         this._configureGetUserMedia();
+
+        let _window = this._windowRef.nativeWindow;
+
+        // creates the audio context
+        let audioContext = _window.AudioContext || _window.webkitAudioContext;
+        this._audioContext = new audioContext();
     }
 
     get recordingInProgress(): boolean {
@@ -42,7 +50,7 @@ export class RecordingService {
             navigator.getUserMedia({ audio: true },
                 (stream) => {
 
-                    this._currentRawRecord = this._rawRecordFactory.create(stream);
+                    this._currentRawRecord = this._rawRecordFactory.create(this._audioContext, stream);
 
                     this._currentRawRecord.stateObserver.subscribe((length) => {
                         //send time status
@@ -126,11 +134,7 @@ export class RecordingService {
                     payload: this._processedRecordFactory.create() //base64AudioData
                 });
 
-                this._currentRawRecord.stream.stop();
-                this._currentRawRecord.stream = null;
-
-                //disconnect
-                this._currentRawRecord.recorder.disconnect(this._currentRawRecord.context.destination);
+                this._currentRawRecord.releaseResources();
             };
         });
 

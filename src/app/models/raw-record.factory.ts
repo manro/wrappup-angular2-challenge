@@ -25,13 +25,11 @@ export class RawRecord {
 
     stateObserver: Observable<any> = null;
 
-    constructor(_window: any, stream: any) {
+    constructor(audioContext: any, stream: any) {
 
         this.stream = stream;
 
-        // creates the audio context
-        let audioContext = _window.AudioContext || _window.webkitAudioContext;
-        this.context = new audioContext();
+        this.context = audioContext;
 
         // we query the context sample rate (varies depending on platforms)
         this.sampleRate = this.context.sampleRate;
@@ -71,6 +69,19 @@ export class RawRecord {
         this.recorder.connect(this.context.destination);
     }
 
+    releaseResources():void {
+        this.stream.stop();
+        this.stream = null;
+        //disconnect
+        this.recorder.disconnect(this.context.destination);
+        this.recorder = null;
+
+        this.context = null;
+
+        this.leftchannel = null;
+        this.rightchannel = null;
+    }
+
     set recording(val: boolean) {
         this._recording = !!val;
     }
@@ -78,12 +89,12 @@ export class RawRecord {
 
 @Injectable()
 export class RawRecordFactory {
-    constructor(@Inject(WindowRef) private _windowRef: WindowRef) {
+    constructor() {
 
     }
 
-    public create(stream: any): RawRecord {
+    public create(audioContext: any, stream: any): RawRecord {
 
-        return new RawRecord(this._windowRef.nativeWindow, stream);
+        return new RawRecord(audioContext, stream);
     }
 }
