@@ -23,7 +23,13 @@ export class AddBookmarkComponent implements OnInit {
         this.textarea.nativeElement.focus();
     }
 
-    /*text: string = null;*/
+    isSaveDisabled() {
+        return (
+            !this.bookmark.text ||
+            !this.bookmark.text.length ||
+            !this.bookmark.text.trim().length
+        );
+    }
 
     save() {
         this.bookmarkNotify.emit({

@@ -17,8 +17,9 @@ import { RecordingComponent } from './views/recording/recording.component';
 import { AddBookmarkComponent } from './components/add-bookmark/add-bookmark.component';
 
 import { RawRecordFactory } from './models/raw-record.factory';
-import { ProcessedRecordFactory } from './models/processed-record.factory';
 import { BookmarkFactory } from './models/bookmark.factory';
+import { BookmarksStorage } from './services/recording/bookmarks.storage';
+import { ViewBookmarkComponent } from './components/view-bookmark/view-bookmark.component';
 
 
 @NgModule({
@@ -36,15 +37,17 @@ import { BookmarkFactory } from './models/bookmark.factory';
   declarations: [
       AppComponent,
       RecordingComponent,
-      AddBookmarkComponent
+      AddBookmarkComponent,
+      ViewBookmarkComponent
   ],
   providers: [
       //services
       RecordingService,
       Utils,
+      BookmarksStorage,
+
       //models
       RawRecordFactory,
-      ProcessedRecordFactory,
       BookmarkFactory,
 
       //native objects

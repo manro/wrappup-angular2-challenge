@@ -1,0 +1,66 @@
+.view-bookmark {
+    position: relative;
+    background-color: #fff;
+    padding: 15px 15px 25px 15px;
+    margin-bottom: 10px;
+    margin-left: 50px;
+
+    text-align: left;
+
+    .bookmark-type {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        line-height: 30px;
+        background-color: #999;
+        color: #fff;
+        border-radius: 15px;
+        left: -50px;
+        top: 10px;
+    }
+
+    .player {
+        margin-bottom: 10px;
+
+        .bookmark-play {
+            float: left;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #333;
+            color: #333;
+            border-radius: 15px;
+            text-align: center;
+            line-height: 30px;
+            padding: 0;
+            background: none;
+
+            .icon-play {
+                &:before {
+                    padding-left: 3px;
+                }
+            }
+        }
+        .bookmark-time-start {
+            margin-left: 30px;
+        }
+        .bookmark-time-start,
+        .bookmark-time-end {
+            float: left;
+            height: 12px;
+            margin-top: 9px;
+            padding: 0 5px;
+            color: #999;
+            font-size: 12px;
+        }
+        .bookmark-progress {
+            float: left;
+            height: 12px;
+            width: 300px;
+            background-color: #eee;
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: 9px;
+        }
+    }
+}

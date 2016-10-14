@@ -1,0 +1,17 @@
+<div class="view-bookmark">
+    <span class="bookmark-type" [ngClass]="{ 'icon-doc-text': bookmark.isNote(), 'icon-dot-circled': bookmark.isAction(), 'icon-check': bookmark.isDecision() }"></span>
+    <div class="player clearfix">
+        <button class="bookmark-play">
+            <span class="icon-play"></span>
+        </button>
+        <div class="bookmark-time-start">{{bookmark.startTime}}</div>
+        <div class="bookmark-progress">
+
+        </div>
+        <div class="bookmark-time-end">{{bookmark.endTime}}</div>
+
+    </div>
+    <div class="text">
+        {{bookmark.text}}
+    </div>
+</div>

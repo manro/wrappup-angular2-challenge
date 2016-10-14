@@ -1,0 +1,8 @@
+
+.icon-plus:before { content: '\e800'; } /* '' */
+.icon-check:before { content: '\e801'; } /* '' */
+.icon-play:before { content: '\e802'; } /* '' */
+.icon-doc-text:before { content: '\f0f6'; } /* '' */
+.icon-mic:before { content: '\f130'; } /* '' */
+.icon-mute:before { content: '\f131'; } /* '' */
+.icon-dot-circled:before { content: '\f192'; } /* '' */

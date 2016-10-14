@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { WindowRef } from '../utils/windowRef';
 import { Utils } from '../utils/utils';
 import { RawRecordFactory } from '../../models/raw-record.factory';
-import { ProcessedRecordFactory } from '../../models/processed-record.factory';
 
 @Injectable()
 export class RecordingService {
@@ -15,10 +14,11 @@ export class RecordingService {
 
     private _audioContext = null;
 
+    private _worker = null;
+
     constructor(
         @Inject(WindowRef) private _windowRef: WindowRef,
-        @Inject(RawRecordFactory) private _rawRecordFactory: RawRecordFactory,
-        @Inject(ProcessedRecordFactory) private _processedRecordFactory: ProcessedRecordFactory
+        @Inject(RawRecordFactory) private _rawRecordFactory: RawRecordFactory
     ) {
         this._configureMediaStream();
         this._configureGetUserMedia();
@@ -28,10 +28,9 @@ export class RecordingService {
         // creates the audio context
         let audioContext = _window.AudioContext || _window.webkitAudioContext;
         this._audioContext = new audioContext();
-    }
 
-    get recordingInProgress(): boolean {
-        return this._recordingInProgress;
+        //create worker
+        this._worker = new _window.Worker('processing-worker.js');
     }
 
     start(): Observable<any> {
@@ -75,9 +74,20 @@ export class RecordingService {
 
             console.time('process');
 
-            // we flat the left and right channels down
+            this._worker.postMessage({
+                action: 'getBlob',
+                payload: {
+                    leftchannel: this._currentRawRecord.leftchannel,
+                    rightchannel: this._currentRawRecord.rightchannel,
+                    recordingLength: this._currentRawRecord.recordingLength,
+                    sampleRate: this._currentRawRecord.sampleRate
+                }
+            });
+
+           /* // we flat the left and right channels down
             let leftBuffer = Utils.mergeBuffers(this._currentRawRecord.leftchannel, this._currentRawRecord.recordingLength);
             let rightBuffer = Utils.mergeBuffers(this._currentRawRecord.rightchannel, this._currentRawRecord.recordingLength);
+
             // we interleave both channels together
             let interleaved = Utils.interleave(leftBuffer, rightBuffer);
 
@@ -115,27 +125,33 @@ export class RecordingService {
 
 
             // our final binary blob that we can hand off
-            let blob = new Blob([ view ], { type: 'audio/wav' });
+            let blob = new Blob([ view ], { type: 'audio/wav' });*/
 
-            let _window = this._windowRef.nativeWindow;
-            let reader = new _window.FileReader();
 
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
 
-                this._currentRawRecord.recording = false;
+            this._worker.onmessage = (e) => {
+                let blob = e.data;
 
-                let base64AudioData = reader.result;
+                let _window = this._windowRef.nativeWindow;
+                let reader = new _window.FileReader();
 
-                console.timeEnd('process');
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
 
-                observer.next({
-                    status: 'done',
-                    payload: this._processedRecordFactory.create() //base64AudioData
-                });
+                    this._currentRawRecord.recording = false;
 
-                this._currentRawRecord.releaseResources();
-            };
+                    let base64AudioData = reader.result;
+
+                    console.timeEnd('process');
+
+                    observer.next({
+                        status: 'done',
+                        payload: base64AudioData
+                    });
+
+                    this._currentRawRecord.releaseResources();
+                };
+            }
         });
 
         // our final binary blob that we can hand off

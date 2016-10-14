@@ -8,7 +8,7 @@
         </span>
 
     </button>
-    <button class="bookmark-btn" (click)="addBookmark()" *ngIf="recording && !bookmarking">
+    <button class="bookmark-btn" (click)="showAddBookmark()" *ngIf="recording && !bookmarking">
 
         <span class="icon-plus"></span>
 
@@ -20,5 +20,6 @@
 
     <wu-add-bookmark *ngIf="isAvailableAddBookmark()" [bookmark]="currentBookmark" (bookmarkNotify)="onBookmarkNotify($event)"></wu-add-bookmark>
 
+    <wu-view-bookmark *ngFor="let bookmark of bookmarksStorage.bookmarks" [bookmark]="bookmark"></wu-view-bookmark>
 
 </div>

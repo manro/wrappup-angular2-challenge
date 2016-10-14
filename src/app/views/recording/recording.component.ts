@@ -1,15 +1,17 @@
 import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
 
 import { RecordingService } from '../../services/recording/recording.service';
-import * as  Moment from 'moment';
 import { Bookmark, BookmarkFactory } from '../../models/bookmark.factory';
+import { BookmarksStorage } from '../../services/recording/bookmarks.storage';
+import { Utils } from '../../services/utils/utils';
+
 
 
 @Component({
     selector: 'wu-recording',
     templateUrl: 'recording.component.html',
     styleUrls: ['recording.component.less'],
-    providers: [ RecordingService ]
+    providers: [ RecordingService, BookmarksStorage ]
 })
 export class RecordingComponent implements OnInit {
 
@@ -24,6 +26,7 @@ export class RecordingComponent implements OnInit {
 
     constructor(
         private _recordingService: RecordingService,
+        public bookmarksStorage: BookmarksStorage,
         private _changeDetectorRef: ChangeDetectorRef,
 
         @Inject(BookmarkFactory) private _bookmarkFactory: BookmarkFactory
@@ -48,31 +51,31 @@ export class RecordingComponent implements OnInit {
             this.recording && this.bookmarking && !this.processing
         )
     }
-    addBookmark():void {
+    showAddBookmark():void {
         this.bookmarking = true;
         this.currentBookmark = this._bookmarkFactory.create();
 
-        this.currentBookmark.start = this.raw_len;
+        this.currentBookmark.start = this._raw_len;
     }
     onBookmarkNotify($event) {
         if ($event.action === 'save') {
-            this.currentBookmark.end = this.raw_len;
-            debugger;
+            this.currentBookmark.end = this._raw_len;
+
+            this.bookmarksStorage.addBookmark(this.currentBookmark);
+            this.bookmarking = false;
+            this.currentBookmark = null;
         }
 
         if ($event.action === 'cancel') {
             this.currentBookmark = null;
+            this.bookmarking = false;
         }
     }
 
-    //private
-    private _formatTime(val:any):string {
-        return Moment.utc(val).format('mm:ss:SSS');
-    }
 
-    private raw_len = null;
     private time: string = '00:00:000';
 
+    private _raw_len = null;
     private _startSub = null;
     private _stopSub = null;
 
@@ -81,8 +84,8 @@ export class RecordingComponent implements OnInit {
         this._startSub = this._recordingService.start().subscribe((envelope) => {
 
             if (envelope.status && (envelope.status === 'recording')) {
-                this.raw_len = envelope.payload;
-                this.time = this._formatTime((envelope.payload / (1024 * 32) * 1000));
+                this._raw_len = envelope.payload;
+                this.time = Utils.formatTimeDuration(Utils.bytesToMilliseconds(this._raw_len));
 
                 this._changeDetectorRef.detectChanges();
             }
@@ -98,6 +101,8 @@ export class RecordingComponent implements OnInit {
             this._startSub = null;
         }
         this.processing = true;
+        this.bookmarking = false;
+        this.recording = false;
 
 
         this._stopSub = this._recordingService.stop().subscribe((envelope) => {
@@ -107,8 +112,8 @@ export class RecordingComponent implements OnInit {
                 this._stopSub = null;
 
                 this.processing = false;
-                this.recording = false;
-                this.bookmarking = false;
+
+                this._changeDetectorRef.detectChanges();
 
             }
         });

@@ -1,5 +1,5 @@
 <div class="recording-bookmark clearfix">
-    <textarea rows="5" #textarea [(ngModel)]="bookmark.text">
+    <textarea rows="5" #textarea [(ngModel)]="bookmark.text" placeholder="Type here to start highlight">
 
     </textarea>
     <hr/>
@@ -29,6 +29,6 @@
 
     <div class="bookmark-controls">
         <button class="cancel" (click)="cancel()">Cancel</button>
-        <button class="save" (click)="save()">Save</button>
+        <button class="save" (click)="save()" [disabled]="isSaveDisabled()">Save</button>
     </div>
 </div>
