@@ -10,6 +10,10 @@ export class Utils {
         return Moment.utc(val).format('mm:ss:SSS');
     }
 
+    static formatTimeDurationForAudioOffset(val:any):string{
+        return Moment.utc(val).format('ssssss.S');
+    }
+
     static bytesToMilliseconds(val:any) {
         return (val / (1024 * 32) * 1000)
     }

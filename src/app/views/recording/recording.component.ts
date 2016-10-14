@@ -80,6 +80,8 @@ export class RecordingComponent implements OnInit {
     private _stopSub = null;
 
     private _start(): void {
+        this.bookmarksStorage.clearAll();
+
         this.recording = true;
         this._startSub = this._recordingService.start().subscribe((envelope) => {
 
@@ -108,6 +110,7 @@ export class RecordingComponent implements OnInit {
         this._stopSub = this._recordingService.stop().subscribe((envelope) => {
             if (envelope.status && (envelope.status === 'done')) {
                 //base64AudioData
+                this.bookmarksStorage.setProcessedAudioData(envelope.payload);
                 this._stopSub.unsubscribe();
                 this._stopSub = null;
 

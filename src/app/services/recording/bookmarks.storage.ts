@@ -13,4 +13,14 @@ export class BookmarksStorage {
     addBookmark(bookmark: Bookmark): void {
         this._bookmarks.push(bookmark);
     }
+
+    setProcessedAudioData(base64AudioData) {
+        this._bookmarks.forEach((bookmark) => {
+            bookmark.base64AudioData = base64AudioData;
+        })
+    }
+
+    clearAll():void {
+        this._bookmarks.length = 0;
+    }
 }

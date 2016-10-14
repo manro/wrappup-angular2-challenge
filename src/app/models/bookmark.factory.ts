@@ -5,8 +5,12 @@ export class Bookmark {
     text:string;
     type:string = AppConstants.bookmark.type.note;
 
-    start: number;
-    end: number;
+    start: number; //bytes count
+    end: number; //bytes count
+
+    private _base64AudioData = null; //future
+
+    private _onProcessed = null;
 
     get startTime() {
         return (
@@ -24,6 +28,22 @@ export class Bookmark {
         )
     }
 
+    set base64AudioData(val:string) {
+        this._base64AudioData = val;
+
+        this._onProcessed && this._onProcessed();
+    }
+
+    get base64AudioData():string {
+        return this._base64AudioData ;
+    }
+
+    subscribeOnProcessed(cb):void {
+        if (typeof cb === 'function') {
+            this._onProcessed = cb;
+        }
+    }
+
     constructor() {
 
     }
@@ -36,6 +56,10 @@ export class Bookmark {
     }
     isDecision():boolean {
         return this.type === AppConstants.bookmark.type.decision;
+    }
+
+    isProcessed():boolean {
+        return !!this._base64AudioData;
     }
 }
 
