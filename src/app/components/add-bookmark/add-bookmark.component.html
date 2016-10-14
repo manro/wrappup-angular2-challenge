@@ -1,0 +1,34 @@
+<div class="recording-bookmark clearfix">
+    <textarea rows="5" #textarea [(ngModel)]="bookmark.text">
+
+    </textarea>
+    <hr/>
+
+    <div class="bookmark-types">
+        <label for="Note">
+            <input type="radio" id="Note" name="type" [(ngModel)]="bookmark.type" value="{{AppConstants.bookmark.type.note}}"/>
+            <span>
+                Note
+            </span>
+        </label>
+
+        <label for="Action">
+            <input type="radio" id="Action" name="type" [(ngModel)]="bookmark.type"  value="{{AppConstants.bookmark.type.action}}"/>
+            <span>
+                Action
+            </span>
+        </label>
+
+        <label for="Decision">
+            <input type="radio" id="Decision" name="type" [(ngModel)]="bookmark.type"  value="{{AppConstants.bookmark.type.decision}}"/>
+            <span>
+                Decision
+            </span>
+        </label>
+    </div>
+
+    <div class="bookmark-controls">
+        <button class="cancel" (click)="cancel()">Cancel</button>
+        <button class="save" (click)="save()">Save</button>
+    </div>
+</div>

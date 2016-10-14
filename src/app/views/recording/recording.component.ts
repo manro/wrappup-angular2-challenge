@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
 
 import { RecordingService } from '../../services/recording/recording.service';
 import * as  Moment from 'moment';
+import { Bookmark, BookmarkFactory } from '../../models/bookmark.factory';
 
 
 @Component({
@@ -15,9 +16,18 @@ export class RecordingComponent implements OnInit {
     recording:boolean = false;
     bookmarking:boolean = false;
 
+    processing:boolean = false;
+
+    currentBookmark: Bookmark = null;
 
 
-    constructor(private _recordingService: RecordingService, private _changeDetectorRef: ChangeDetectorRef) {
+
+    constructor(
+        private _recordingService: RecordingService,
+        private _changeDetectorRef: ChangeDetectorRef,
+
+        @Inject(BookmarkFactory) private _bookmarkFactory: BookmarkFactory
+    ) {
       // Do stuff
     }
 
@@ -33,8 +43,26 @@ export class RecordingComponent implements OnInit {
             this._stop();
         }
     }
+    isAvailableAddBookmark():boolean {
+        return (
+            this.recording && this.bookmarking && !this.processing
+        )
+    }
     addBookmark():void {
-        this.bookmarking =! this.bookmarking;
+        this.bookmarking = true;
+        this.currentBookmark = this._bookmarkFactory.create();
+
+        this.currentBookmark.start = this.raw_len;
+    }
+    onBookmarkNotify($event) {
+        if ($event.action === 'save') {
+            this.currentBookmark.end = this.raw_len;
+            debugger;
+        }
+
+        if ($event.action === 'cancel') {
+            this.currentBookmark = null;
+        }
     }
 
     //private
@@ -42,16 +70,18 @@ export class RecordingComponent implements OnInit {
         return Moment.utc(val).format('mm:ss:SSS');
     }
 
+    private raw_len = null;
     private time: string = '00:00:000';
 
     private _startSub = null;
     private _stopSub = null;
 
     private _start(): void {
-        this.recording = !this.recording;
+        this.recording = true;
         this._startSub = this._recordingService.start().subscribe((envelope) => {
 
             if (envelope.status && (envelope.status === 'recording')) {
+                this.raw_len = envelope.payload;
                 this.time = this._formatTime((envelope.payload / (1024 * 32) * 1000));
 
                 this._changeDetectorRef.detectChanges();
@@ -67,13 +97,19 @@ export class RecordingComponent implements OnInit {
             this._startSub.unsubscribe();
             this._startSub = null;
         }
+        this.processing = true;
+
+
         this._stopSub = this._recordingService.stop().subscribe((envelope) => {
-            debugger;
             if (envelope.status && (envelope.status === 'done')) {
                 //base64AudioData
                 this._stopSub.unsubscribe();
                 this._stopSub = null;
-                this.recording = !this.recording;
+
+                this.processing = false;
+                this.recording = false;
+                this.bookmarking = false;
+
             }
         });
     }

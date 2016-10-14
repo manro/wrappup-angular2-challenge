@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Bookmark } from './bookmark.factory';
 
 export class ProcessedRecord {
 
@@ -6,10 +7,14 @@ export class ProcessedRecord {
 
     constructor() { }
 
+    get bookmarks():any {
+        return this._bookmarks;
+    }
+
     setTrack(track: any):void {
 
     }
-    addBookmark(start: number, end: number, text: string): void {
+    addBookmark(bookmark: Bookmark): void {
 
     }
 

@@ -1,5 +1,5 @@
 <div class="recording-controls">
-    <button class="record-btn" (click)="toggleRecording()">
+    <button class="record-btn" (click)="toggleRecording()" [disabled]="processing">
 
         <span [ngClass]="{
             'icon-mic': !recording,
@@ -18,5 +18,7 @@
         <span>{{time}}</span>
     </div>
 
-    <wu-bookmark *ngIf="recording && bookmarking"></wu-bookmark>
+    <wu-add-bookmark *ngIf="isAvailableAddBookmark()" [bookmark]="currentBookmark" (bookmarkNotify)="onBookmarkNotify($event)"></wu-add-bookmark>
+
+
 </div>

@@ -14,10 +14,11 @@ import { RecordingService } from './services/recording/recording.service';
 import { Utils } from './services/utils/utils';
 import { WindowRef } from './services/utils/windowRef';
 import { RecordingComponent } from './views/recording/recording.component';
-import { BookmarkComponent } from './components/bookmark.component';
+import { AddBookmarkComponent } from './components/add-bookmark/add-bookmark.component';
 
 import { RawRecordFactory } from './models/raw-record.factory';
 import { ProcessedRecordFactory } from './models/processed-record.factory';
+import { BookmarkFactory } from './models/bookmark.factory';
 
 
 @NgModule({
@@ -35,7 +36,7 @@ import { ProcessedRecordFactory } from './models/processed-record.factory';
   declarations: [
       AppComponent,
       RecordingComponent,
-      BookmarkComponent
+      AddBookmarkComponent
   ],
   providers: [
       //services
@@ -44,6 +45,7 @@ import { ProcessedRecordFactory } from './models/processed-record.factory';
       //models
       RawRecordFactory,
       ProcessedRecordFactory,
+      BookmarkFactory,
 
       //native objects
       WindowRef,
