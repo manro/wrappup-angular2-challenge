@@ -20,6 +20,7 @@ import { RawRecordFactory } from './models/raw-record.factory';
 import { BookmarkFactory } from './models/bookmark.factory';
 import { BookmarksStorage } from './services/recording/bookmarks.storage';
 import { ViewBookmarkComponent } from './components/view-bookmark/view-bookmark.component';
+import { PlayingService } from './services/recording/playing.service';
 
 
 @NgModule({
@@ -43,6 +44,7 @@ import { ViewBookmarkComponent } from './components/view-bookmark/view-bookmark.
   providers: [
       //services
       RecordingService,
+      PlayingService,
       Utils,
       BookmarksStorage,
 

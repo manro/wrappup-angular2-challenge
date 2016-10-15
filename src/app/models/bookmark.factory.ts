@@ -2,20 +2,17 @@ import { AppConstants } from '../constants/app.constants';
 import { Utils } from '../services/utils/utils';
 
 export class Bookmark {
+    id: string = null;
     text:string;
     type:string = AppConstants.bookmark.type.note;
 
     start: number; //bytes count
     end: number; //bytes count
 
-    private _base64AudioData = null; //future
-
-    private _onProcessed = null;
-
     get startTime() {
         return (
             Utils.formatTimeDuration(
-                Utils.bytesToMilliseconds(this.start)
+                this.start * 1000
             )
         )
     }
@@ -23,29 +20,13 @@ export class Bookmark {
     get endTime() {
         return (
             Utils.formatTimeDuration(
-                Utils.bytesToMilliseconds(this.end)
+                this.end * 1000
             )
         )
     }
 
-    set base64AudioData(val:string) {
-        this._base64AudioData = val;
-
-        this._onProcessed && this._onProcessed();
-    }
-
-    get base64AudioData():string {
-        return this._base64AudioData ;
-    }
-
-    subscribeOnProcessed(cb):void {
-        if (typeof cb === 'function') {
-            this._onProcessed = cb;
-        }
-    }
-
     constructor() {
-
+        this.id = Utils.getGUID();
     }
 
     isNote():boolean {
@@ -58,9 +39,6 @@ export class Bookmark {
         return this.type === AppConstants.bookmark.type.decision;
     }
 
-    isProcessed():boolean {
-        return !!this._base64AudioData;
-    }
 }
 
 export class BookmarkFactory {

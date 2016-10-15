@@ -4,14 +4,14 @@ import { RecordingService } from '../../services/recording/recording.service';
 import { Bookmark, BookmarkFactory } from '../../models/bookmark.factory';
 import { BookmarksStorage } from '../../services/recording/bookmarks.storage';
 import { Utils } from '../../services/utils/utils';
+import { PlayingService } from '../../services/recording/playing.service';
 
 
 
 @Component({
     selector: 'wu-recording',
     templateUrl: 'recording.component.html',
-    styleUrls: ['recording.component.less'],
-    providers: [ RecordingService, BookmarksStorage ]
+    styleUrls: ['recording.component.less']
 })
 export class RecordingComponent implements OnInit {
 
@@ -26,8 +26,9 @@ export class RecordingComponent implements OnInit {
 
     constructor(
         private _recordingService: RecordingService,
-        public bookmarksStorage: BookmarksStorage,
+        private _playingService: PlayingService,
         private _changeDetectorRef: ChangeDetectorRef,
+        public bookmarksStorage: BookmarksStorage,
 
         @Inject(BookmarkFactory) private _bookmarkFactory: BookmarkFactory
     ) {
@@ -55,11 +56,11 @@ export class RecordingComponent implements OnInit {
         this.bookmarking = true;
         this.currentBookmark = this._bookmarkFactory.create();
 
-        this.currentBookmark.start = this._raw_len;
+        this.currentBookmark.start = this._duration;
     }
     onBookmarkNotify($event) {
         if ($event.action === 'save') {
-            this.currentBookmark.end = this._raw_len;
+            this.currentBookmark.end = this._duration;
 
             this.bookmarksStorage.addBookmark(this.currentBookmark);
             this.bookmarking = false;
@@ -75,7 +76,7 @@ export class RecordingComponent implements OnInit {
 
     private time: string = '00:00:000';
 
-    private _raw_len = null;
+    private _duration = null;
     private _startSub = null;
     private _stopSub = null;
 
@@ -86,8 +87,8 @@ export class RecordingComponent implements OnInit {
         this._startSub = this._recordingService.start().subscribe((envelope) => {
 
             if (envelope.status && (envelope.status === 'recording')) {
-                this._raw_len = envelope.payload;
-                this.time = Utils.formatTimeDuration(Utils.bytesToMilliseconds(this._raw_len));
+                this._duration = envelope.payload;
+                this.time = Utils.formatTimeDuration(this._duration * 1000);
 
                 this._changeDetectorRef.detectChanges();
             }
@@ -110,7 +111,8 @@ export class RecordingComponent implements OnInit {
         this._stopSub = this._recordingService.stop().subscribe((envelope) => {
             if (envelope.status && (envelope.status === 'done')) {
                 //base64AudioData
-                this.bookmarksStorage.setProcessedAudioData(envelope.payload);
+                this._playingService.track = envelope.payload;
+
                 this._stopSub.unsubscribe();
                 this._stopSub = null;
 

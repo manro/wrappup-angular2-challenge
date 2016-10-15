@@ -59,7 +59,7 @@ export class RawRecord {
                 this.rightchannel.push(new Float32Array(right));
                 this.recordingLength += bufferSize;
 
-                observer.next(this.recordingLength)
+                observer.next(this.recordingLength / this.sampleRate)
             };
         });
 

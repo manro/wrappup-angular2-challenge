@@ -6,19 +6,29 @@ export class Utils {
 
     constructor() { }
 
+    static getGUID ():string {
+        let d = new Date().getTime();
+        let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = (d + Math.random() * 16) % 16 | 0;
+            d = Math.floor(d / 16);
+            return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+        });
+        return uuid;
+    }
+
     static formatTimeDuration(val:any):string {
         return Moment.utc(val).format('mm:ss:SSS');
     }
 
-    static formatTimeDurationForAudioOffset(val:any):string{
-        return Moment.utc(val).format('ssssss.S');
+    static formatTimeDurationForAudioOffset(val:number):number{
+        return (val / 1000);
     }
 
     static bytesToMilliseconds(val:any) {
-        return (val / (1024 * 32) * 1000)
+        return (val / (1024 * 22) * 1000);
     }
 
-    static mergeBuffers(channelBuffer, recordingLength): any{
+    /*static mergeBuffers(channelBuffer, recordingLength): any{
         let result = new Float32Array(recordingLength);
         let offset = 0;
         let lng = channelBuffer.length;
@@ -50,6 +60,6 @@ export class Utils {
         for (let i = 0; i < lng; i++){
             view.setUint8(offset + i, string.charCodeAt(i));
         }
-    }
+    }*/
 
 }

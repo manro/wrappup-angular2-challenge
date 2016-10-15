@@ -47,6 +47,12 @@
       "css": "play",
       "code": 59394,
       "src": "fontawesome"
+    },
+    {
+      "uid": "b624a1e512819d410ddbee84e6918b9d",
+      "css": "stop",
+      "code": 59395,
+      "src": "fontawesome"
     }
   ]
 }
