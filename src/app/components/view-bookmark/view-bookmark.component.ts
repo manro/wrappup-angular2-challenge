@@ -23,7 +23,7 @@ export class ViewBookmarkComponent implements OnInit, OnDestroy {
 
     ngAfterContentInit() {
         this._playSub = this._playingService.emitter.subscribe((data) => {
-            debugger;
+
             if (data.payload.bookmark_id === this.bookmark.id) {
                 if (data.action === 'update') {
                     this.progress = data.payload.progress;
@@ -55,9 +55,7 @@ export class ViewBookmarkComponent implements OnInit, OnDestroy {
     }
 
     isProcessed():boolean {
-        return (
-            !!this._playingService.track
-        );
+        return this._playingService.isProcessed();
     }
 
 

@@ -13,6 +13,16 @@ export class BookmarksStorage {
     addBookmark(bookmark: Bookmark): void {
         this._bookmarks.push(bookmark);
     }
+    removeBookmark(id:string):void {
+        let len = this._bookmarks.length;
+       for (let i = 0; i < len; i++) {
+           let bm = this._bookmarks[i];
+           if (bm.id === id) {
+               this._bookmarks.splice(i, 1);
+               return;
+           }
+       }
+    }
 
     clearAll():void {
         this._bookmarks.length = 0;

@@ -19,8 +19,10 @@
         <span>{{time}}</span>
     </div>
 
+    <wu-view-record [duration]="duration"></wu-view-record>
+
     <wu-add-bookmark *ngIf="isAvailableAddBookmark()" [bookmark]="currentBookmark" (bookmarkNotify)="onBookmarkNotify($event)"></wu-add-bookmark>
 
-    <wu-view-bookmark *ngFor="let bookmark of bookmarksStorage.bookmarks" [bookmark]="bookmark"></wu-view-bookmark>
+    <wu-view-bookmark *ngFor="let bookmark of bookmarksStorage.bookmarks;trackBy:bookmark?.id" [bookmark]="bookmark"></wu-view-bookmark>
 
 </div>

@@ -1,0 +1,18 @@
+<div class="view-record">
+    <button class="record-play" [disabled]="!isProcessed()" (click)="play()" *ngIf="!playing">
+        <span class="icon-play"></span>
+    </button>
+    <button class="record-stop" [disabled]="!isProcessed()" (click)="stop()" *ngIf="playing">
+        <span class="icon-stop"></span>
+    </button>
+    <div class="record-container">
+        <div class="bookmark-selection" *ngFor="let bookmark of bookmarksStorage.bookmarks;trackBy:bookmark?.id" [ngStyle]="{left: getLeft(bookmark), width: getWidth(bookmark)}">
+            <div class="bookmark-selection-inner">
+                <span class="bookmark-type"
+                      [ngClass]="{ 'icon-doc-text': bookmark.isNote(), 'icon-dot-circled': bookmark.isAction(), 'icon-check': bookmark.isDecision(), 'disabled': !isProcessed() }"
+                ></span>
+            </div>
+        </div>
+        <div class="record-playing-progress" [ngStyle]="{left: progress + '%'}" *ngIf="isProcessed()"></div>
+    </div>
+</div>

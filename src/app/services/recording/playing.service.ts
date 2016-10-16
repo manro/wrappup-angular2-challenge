@@ -32,7 +32,7 @@ export class PlayingService {
                 }
             });
         };
-        this.audio.onplaying = () => {
+        /*this.audio.onplaying = () => {
             this.emitter.emit({
                 action: 'play',
                 payload: {
@@ -40,8 +40,8 @@ export class PlayingService {
                     bookmark_id: this.current_bookmark_id
                 }
             });
-        };
-        this.audio.onpause = () => {
+        };*/
+        /*this.audio.onpause = () => {
             this.emitter.emit({
                 action: 'stop',
                 payload: {
@@ -49,33 +49,57 @@ export class PlayingService {
                     bookmark_id: this.current_bookmark_id
                 }
             });
-        }
+        }*/
 
 
     }
 
-    play(bookmark:Bookmark) {
+    play(bookmark?:Bookmark) {
         if (this._track) {
 
-            this.current_bookmark_id = bookmark.id;
+            if (this.isPlaying()) {
+                this.emitter.emit({
+                    action: 'stop',
+                    payload: {
+                        progress: 0,
+                        bookmark_id: this.current_bookmark_id
+                    }
+                });
+            }
 
-            this.stop();
+            let id = bookmark ? bookmark.id : null;
+            let start = bookmark ? bookmark.start : 0;
+            let end = bookmark ? bookmark.end : this._duration;
 
+
+            this.current_bookmark_id = id;
 
 
             this._onloadedmetadata(() => {
-                this.audio.currentTime = bookmark.start;
+                this.audio.currentTime = start;
                 this.audio.play();
+
+                this.emitter.emit({
+                    action: 'play',
+                    payload: {
+                        progress: 0,
+                        bookmark_id: this.current_bookmark_id
+                    }
+                });
             });
             this._ontimeupdate(() => {
-                let end = bookmark.end;
-                let start = bookmark.start;
-
                 this._progress = (100 * ((this.audio.currentTime - start) / (end - start ) ));
                 if (this.audio.currentTime >= end) {
                     this._progress = 100;
                     this.audio.pause();
-                    //this.audio.currentTime = start;
+
+                    this.emitter.emit({
+                        action: 'stop',
+                        payload: {
+                            progress: 0,
+                            bookmark_id: this.current_bookmark_id
+                        }
+                    });
                 }
             });
         }
@@ -84,12 +108,25 @@ export class PlayingService {
     stop():void {
         this.audio && this.audio.pause();
         this._progress = 0;
+
+        this.emitter.emit({
+            action: 'stop',
+            payload: {
+                progress: 0,
+                bookmark_id: this.current_bookmark_id
+            }
+        });
     }
     isPlaying():boolean {
         return (
             this.audio &&
             !this.audio.ended &&
             !this.audio.paused
+        );
+    }
+    isProcessed():boolean {
+        return (
+            !!this._track
         );
     }
 
@@ -106,6 +143,11 @@ export class PlayingService {
     }
     get track():string {
         return this._track;
+    }
+
+    private _duration = 0;
+    set duration(val:number) {
+        this._duration = val;
     }
 
     private _progress = 0;

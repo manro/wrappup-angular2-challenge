@@ -21,6 +21,7 @@ import { BookmarkFactory } from './models/bookmark.factory';
 import { BookmarksStorage } from './services/recording/bookmarks.storage';
 import { ViewBookmarkComponent } from './components/view-bookmark/view-bookmark.component';
 import { PlayingService } from './services/recording/playing.service';
+import { ViewRecordComponent } from './components/view-record/view-record.component';
 
 
 @NgModule({
@@ -39,7 +40,8 @@ import { PlayingService } from './services/recording/playing.service';
       AppComponent,
       RecordingComponent,
       AddBookmarkComponent,
-      ViewBookmarkComponent
+      ViewBookmarkComponent,
+      ViewRecordComponent
   ],
   providers: [
       //services

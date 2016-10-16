@@ -19,6 +19,7 @@ export class RecordingComponent implements OnInit {
     bookmarking:boolean = false;
 
     processing:boolean = false;
+    processed:boolean = false;
 
     currentBookmark: Bookmark = null;
 
@@ -56,18 +57,19 @@ export class RecordingComponent implements OnInit {
         this.bookmarking = true;
         this.currentBookmark = this._bookmarkFactory.create();
 
-        this.currentBookmark.start = this._duration;
+        this.bookmarksStorage.addBookmark(this.currentBookmark);
+
+        this.currentBookmark.start = this.duration;
     }
     onBookmarkNotify($event) {
         if ($event.action === 'save') {
-            this.currentBookmark.end = this._duration;
-
-            this.bookmarksStorage.addBookmark(this.currentBookmark);
+            this.currentBookmark.end = this.duration;
             this.bookmarking = false;
             this.currentBookmark = null;
         }
 
         if ($event.action === 'cancel') {
+            this.bookmarksStorage.removeBookmark(this.currentBookmark.id);
             this.currentBookmark = null;
             this.bookmarking = false;
         }
@@ -76,7 +78,7 @@ export class RecordingComponent implements OnInit {
 
     private time: string = '00:00:000';
 
-    private _duration = null;
+    private duration = null;
     private _startSub = null;
     private _stopSub = null;
 
@@ -84,16 +86,16 @@ export class RecordingComponent implements OnInit {
         this.bookmarksStorage.clearAll();
 
         this.recording = true;
+        this.processed = false;
+
         this._startSub = this._recordingService.start().subscribe((envelope) => {
 
             if (envelope.status && (envelope.status === 'recording')) {
-                this._duration = envelope.payload;
-                this.time = Utils.formatTimeDuration(this._duration * 1000);
+                this.duration = envelope.payload;
+                this.time = Utils.formatTimeDuration(this.duration * 1000);
 
                 this._changeDetectorRef.detectChanges();
             }
-
-            /*console.log('record length ', );*/
 
         });
 
@@ -112,11 +114,13 @@ export class RecordingComponent implements OnInit {
             if (envelope.status && (envelope.status === 'done')) {
                 //base64AudioData
                 this._playingService.track = envelope.payload;
+                this._playingService.duration = this.duration;
 
                 this._stopSub.unsubscribe();
                 this._stopSub = null;
 
                 this.processing = false;
+                this.processed = true;
 
                 this._changeDetectorRef.detectChanges();
 
