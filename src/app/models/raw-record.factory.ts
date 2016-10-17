@@ -19,6 +19,9 @@ export class RawRecord {
     leftchannel = [];
     rightchannel = [];
     recorder = null;
+    analyser  = null;
+    analyserNode = null;
+    bands = null;
     recordingLength = 0;
     sampleRate = null;
     context = null;
@@ -43,7 +46,14 @@ export class RawRecord {
         // connect the stream to the gain node
         audioInput.connect(volume);
 
+        //creating recorder
         this.recorder = this.context.createScriptProcessor(bufferSize, 2, 2);
+
+        //creating analyzer
+        this.analyserNode = audioContext.createScriptProcessor(2048, 1, 1);
+        this.analyser = this.context.createAnalyser();
+        this.analyser.fftSize = 512;
+        this.bands = new Uint8Array(this.analyser.frequencyBinCount);
 
         this.stateObserver = new Observable(observer => {
             this.recorder.onaudioprocess = (e) => {
@@ -59,22 +69,45 @@ export class RawRecord {
                 this.rightchannel.push(new Float32Array(right));
                 this.recordingLength += bufferSize;
 
-                observer.next(this.recordingLength / this.sampleRate)
+
+                //renew analyser bands
+                this.analyser.getByteFrequencyData(this.bands);
+
+                observer.next({
+                    action: 'recording',
+                    payload: {
+                        duration: this.recordingLength / this.sampleRate,
+                        bands: this.bands
+                    }
+                })
             };
         });
 
         // we connect the recorder
         volume.connect(this.recorder);
-
         this.recorder.connect(this.context.destination);
+
+        //we connect the analyser
+        this.analyserNode.connect(volume);
+        audioInput.connect(this.analyser);
+        this.analyser.connect(this.analyserNode);
+
+
     }
 
     releaseResources():void {
         this.stream.stop();
         this.stream = null;
+
         //disconnect
         this.recorder.disconnect(this.context.destination);
         this.recorder = null;
+
+        //disconnect
+        this.analyser.disconnect(this.analyserNode);
+        this.analyser = null;
+
+        this.bands = null;
 
         this.context = null;
 

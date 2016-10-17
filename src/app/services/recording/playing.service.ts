@@ -32,6 +32,15 @@ export class PlayingService {
                 }
             });
         };
+        this.audio.onended = () => {
+            this.emitter.emit({
+                action: 'stop',
+                payload: {
+                    time: this.audio.currentTime,
+                    bookmark_id: this.current_bookmark_id
+                }
+            });
+        }
     }
 
     play(bookmark?:Bookmark) {
@@ -69,9 +78,6 @@ export class PlayingService {
             });
             this._ontimeupdate(() => {
                  if (this.audio.currentTime >= end) {
-
-                     this._ontimeupdate(() => {});
-
                      this.audio.pause();
 
                      this.audio.currentTime = end;
@@ -83,6 +89,8 @@ export class PlayingService {
                             bookmark_id: this.current_bookmark_id
                         }
                     });
+
+                     this._ontimeupdate(() => {});
                 }
             });
         }
@@ -90,7 +98,6 @@ export class PlayingService {
     }
     stop():void {
         this.audio && this.audio.pause();
-
 
         this.emitter.emit({
             action: 'stop',

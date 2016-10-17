@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject, OnDestroy } from '@angular/core';
 
 import { RecordingService } from '../../services/recording/recording.service';
 import { Bookmark, BookmarkFactory } from '../../models/bookmark.factory';
@@ -13,7 +13,7 @@ import { PlayingService } from '../../services/recording/playing.service';
     templateUrl: 'recording.component.html',
     styleUrls: ['recording.component.less']
 })
-export class RecordingComponent implements OnInit {
+export class RecordingComponent implements OnInit, OnDestroy {
 
     recording:boolean = false;
     bookmarking:boolean = false;
@@ -38,6 +38,38 @@ export class RecordingComponent implements OnInit {
 
     ngOnInit() {
       console.log('Recording comp init');
+
+        this._sub = this._recordingService.emitter.subscribe((data) => {
+
+            if (data.action) {
+
+                if (data.action === 'recording') {
+                    this.duration = data.payload.duration;
+
+                    this.time = Utils.formatTimeDuration(this.duration * 1000);
+
+                    this._changeDetectorRef.detectChanges();
+                }
+
+                if (data.action === 'done') {
+                    //base64AudioData
+                    this._playingService.track = data.payload;
+                    this._playingService.duration = this.duration;
+
+
+                    this.processing = false;
+                    this.processed = true;
+
+                    this._changeDetectorRef.detectChanges();
+
+                }
+            }
+
+        });
+    }
+
+    ngOnDestroy() {
+        this._sub.unsubscribe();
     }
 
     //public
@@ -79,8 +111,8 @@ export class RecordingComponent implements OnInit {
     private time: string = '00:00:000';
 
     private duration = null;
-    private _startSub = null;
-    private _stopSub = null;
+
+    private _sub = null;
 
     private _start(): void {
         this.bookmarksStorage.clearAll();
@@ -88,44 +120,17 @@ export class RecordingComponent implements OnInit {
         this.recording = true;
         this.processed = false;
 
-        this._startSub = this._recordingService.start().subscribe((envelope) => {
-
-            if (envelope.status && (envelope.status === 'recording')) {
-                this.duration = envelope.payload;
-                this.time = Utils.formatTimeDuration(this.duration * 1000);
-
-                this._changeDetectorRef.detectChanges();
-            }
-
-        });
+        this._recordingService.start();
 
     }
     private _stop(): void {
-        if (this._startSub) {
-            this._startSub.unsubscribe();
-            this._startSub = null;
-        }
+
         this.processing = true;
         this.bookmarking = false;
         this.recording = false;
 
 
-        this._stopSub = this._recordingService.stop().subscribe((envelope) => {
-            if (envelope.status && (envelope.status === 'done')) {
-                //base64AudioData
-                this._playingService.track = envelope.payload;
-                this._playingService.duration = this.duration;
-
-                this._stopSub.unsubscribe();
-                this._stopSub = null;
-
-                this.processing = false;
-                this.processed = true;
-
-                this._changeDetectorRef.detectChanges();
-
-            }
-        });
+        this._recordingService.stop();
     }
 
 }

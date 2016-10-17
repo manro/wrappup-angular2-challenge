@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable, Inject, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { WindowRef } from '../utils/windowRef';
@@ -10,11 +10,15 @@ export class RecordingService {
 
     private _currentRawRecord: any = null;
 
+    private _currentRawRecordSub = null;
+
     private _recordingInProgress = false;
 
     private _audioContext = null;
 
     private _worker = null;
+
+    emitter: EventEmitter<any> = new EventEmitter();
 
     constructor(
         @Inject(WindowRef) private _windowRef: WindowRef,
@@ -33,7 +37,7 @@ export class RecordingService {
         this._worker = new _window.Worker('processing-worker.js');
     }
 
-    start(): Observable<any> {
+    start(): void {
 
         if (this._recordingInProgress) {
             return;
@@ -44,70 +48,71 @@ export class RecordingService {
         let _window = this._windowRef.nativeWindow;
         let navigator = _window[ 'navigator' ];
 
-        return new Observable(observer => {
+        navigator.getUserMedia({ audio: true },
+            (stream) => {
 
-            navigator.getUserMedia({ audio: true },
-                (stream) => {
+                this._currentRawRecord = this._rawRecordFactory.create(this._audioContext, stream);
 
-                    this._currentRawRecord = this._rawRecordFactory.create(this._audioContext, stream);
+                this._currentRawRecordSub = this._currentRawRecord.stateObserver.subscribe((data) => {
+                    //send time status
+                    this.emitter.emit(data);
 
-                    this._currentRawRecord.stateObserver.subscribe((length) => {
-                        //send time status
-                        observer.next({
-                            status: 'recording',
-                            payload: length
-                        });
-
-                    });
-                }, () => {
-                    this._recordingInProgress = false;
-                    observer.error();
                 });
-
-        });
-    }
-
-    stop(): Observable<any> {
-        this._recordingInProgress = false;
-
-        return new Observable(observer => {
-
-            console.time('process');
-
-            this._worker.postMessage({
-                action: 'getBlob',
-                payload: {
-                    leftchannel: this._currentRawRecord.leftchannel,
-                    rightchannel: this._currentRawRecord.rightchannel,
-                    recordingLength: this._currentRawRecord.recordingLength,
-                    sampleRate: this._currentRawRecord.sampleRate
-                }
+            }, (e) => {
+                this._recordingInProgress = false;
+                this.emitter.emit({
+                    action: 'error',
+                    payload: e
+                });
             });
 
-            this._worker.onmessage = (e) => {
-                let blob = e.data;
+    }
 
-                let _window = this._windowRef.nativeWindow;
-                let reader = new _window.FileReader();
+    stop(): void {
+        this._recordingInProgress = false;
 
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
+        if (this._currentRawRecordSub) {
+            this._currentRawRecordSub.unsubscribe();
+        }
 
-                    this._currentRawRecord.recording = false;
 
-                    let base64AudioData = reader.result;
 
-                    console.timeEnd('process');
+        console.time('process');
 
-                    observer.next({
-                        status: 'done',
-                        payload: base64AudioData
-                    });
-
-                    this._currentRawRecord.releaseResources();
-                };
+        this._worker.postMessage({
+            action: 'getBlob',
+            payload: {
+                leftchannel: this._currentRawRecord.leftchannel,
+                rightchannel: this._currentRawRecord.rightchannel,
+                recordingLength: this._currentRawRecord.recordingLength,
+                sampleRate: this._currentRawRecord.sampleRate
             }
         });
+
+        this._worker.onmessage = (e) => {
+            let blob = e.data;
+
+            let _window = this._windowRef.nativeWindow;
+            let reader = new _window.FileReader();
+
+            reader.readAsDataURL(blob);
+
+            reader.onloadend = () => {
+
+                this._currentRawRecord.recording = false;
+
+                let base64AudioData = reader.result;
+
+                console.timeEnd('process');
+
+                this.emitter.emit({
+                    action: 'done',
+                    payload: base64AudioData
+                });
+
+                this._currentRawRecord.releaseResources();
+            };
+        }
 
     }
 

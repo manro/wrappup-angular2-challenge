@@ -5,7 +5,7 @@
     <button class="record-stop" [disabled]="!isProcessed()" (click)="stop()" *ngIf="playing">
         <span class="icon-stop"></span>
     </button>
-    <div class="record-container">
+    <div class="record-container" #rc>
         <div class="bookmark-selection" *ngFor="let bookmark of bookmarksStorage.bookmarks;trackBy:bookmark?.id" [ngStyle]="{left: getLeft(bookmark), width: getWidth(bookmark)}">
             <div class="bookmark-selection-inner">
                 <span class="bookmark-type"
@@ -14,6 +14,8 @@
                 ></span>
             </div>
         </div>
+        <canvas #canvas height="75"></canvas>
+
         <div class="record-playing-progress" [ngStyle]="{left: progress + '%'}" *ngIf="isProcessed()"></div>
     </div>
 </div>
