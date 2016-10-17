@@ -13,6 +13,7 @@ export class ViewRecordComponent implements OnInit {
     @Input() duration;
 
     playing:boolean = false;
+    full_playing:boolean = false;
     progress:number = 0;
 
     constructor(public bookmarksStorage: BookmarksStorage, private _playingService: PlayingService) { }
@@ -22,20 +23,25 @@ export class ViewRecordComponent implements OnInit {
     ngAfterContentInit() {
         this._playSub = this._playingService.emitter.subscribe((data) => {
 
-            if (!data.payload.bookmark_id) {
+                this.progress = this.getPercentProgressFromTime(data.payload.time);
+
                 if (data.action === 'update') {
-                    this.progress = data.payload.progress;
+
                 }
                 if (data.action === 'play') {
-                    this.progress = data.payload.progress;
                     this.playing = true;
                 }
                 if (data.action === 'stop') {
-                    this.progress = data.payload.progress;
+                    this.full_playing = false;
                     this.playing = false;
                 }
-            }
         });
+    }
+
+    getPercentProgressFromTime(time:number) {
+        return (
+            100 * (time / this.duration)
+        );
     }
 
     getLeft(bookmark:Bookmark) {
@@ -52,9 +58,18 @@ export class ViewRecordComponent implements OnInit {
 
     play():void {
         this._playingService.play();
+        this.full_playing = true;
     }
     stop():void {
         this._playingService.stop();
+    }
+
+    playFrom(bookmark: Bookmark):void {
+        if (this.full_playing) {
+            this._playingService.jumpTo(bookmark.start)
+        } else {
+            this._playingService.play(bookmark);
+        }
     }
 
     private _playSub:any = null;

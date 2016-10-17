@@ -27,31 +27,11 @@ export class PlayingService {
             this.emitter.emit({
                 action: 'update',
                 payload: {
-                    progress: this._progress,
+                    time: this.audio.currentTime,
                     bookmark_id: this.current_bookmark_id
                 }
             });
         };
-        /*this.audio.onplaying = () => {
-            this.emitter.emit({
-                action: 'play',
-                payload: {
-                    progress: this._progress,
-                    bookmark_id: this.current_bookmark_id
-                }
-            });
-        };*/
-        /*this.audio.onpause = () => {
-            this.emitter.emit({
-                action: 'stop',
-                payload: {
-                    progress: 0,
-                    bookmark_id: this.current_bookmark_id
-                }
-            });
-        }*/
-
-
     }
 
     play(bookmark?:Bookmark) {
@@ -61,7 +41,7 @@ export class PlayingService {
                 this.emitter.emit({
                     action: 'stop',
                     payload: {
-                        progress: 0,
+                        time: this.audio.currentTime,
                         bookmark_id: this.current_bookmark_id
                     }
                 });
@@ -82,21 +62,24 @@ export class PlayingService {
                 this.emitter.emit({
                     action: 'play',
                     payload: {
-                        progress: 0,
+                        time: this.audio.currentTime,
                         bookmark_id: this.current_bookmark_id
                     }
                 });
             });
             this._ontimeupdate(() => {
-                this._progress = (100 * ((this.audio.currentTime - start) / (end - start ) ));
-                if (this.audio.currentTime >= end) {
-                    this._progress = 100;
-                    this.audio.pause();
+                 if (this.audio.currentTime >= end) {
+
+                     this._ontimeupdate(() => {});
+
+                     this.audio.pause();
+
+                     this.audio.currentTime = end;
 
                     this.emitter.emit({
                         action: 'stop',
                         payload: {
-                            progress: 0,
+                            time: this.audio.currentTime,
                             bookmark_id: this.current_bookmark_id
                         }
                     });
@@ -107,16 +90,21 @@ export class PlayingService {
     }
     stop():void {
         this.audio && this.audio.pause();
-        this._progress = 0;
+
 
         this.emitter.emit({
             action: 'stop',
             payload: {
-                progress: 0,
+                time: this.audio.currentTime,
                 bookmark_id: this.current_bookmark_id
             }
         });
     }
+    jumpTo(time: number) {
+        this.audio.currentTime = time;
+    }
+
+
     isPlaying():boolean {
         return (
             this.audio &&
@@ -150,8 +138,6 @@ export class PlayingService {
         this._duration = val;
     }
 
-    private _progress = 0;
-
     private _loadedmetadata = false;
     private _onloadedmetadatacallback = () => {};
     private _onloadedmetadata (callback:any) {
@@ -170,7 +156,6 @@ export class PlayingService {
             this._ontimeupdatecallback = callback;
         }
     }
-
 
 
 }

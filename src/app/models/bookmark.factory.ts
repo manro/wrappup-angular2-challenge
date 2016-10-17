@@ -6,8 +6,8 @@ export class Bookmark {
     text:string;
     type:string = AppConstants.bookmark.type.note;
 
-    start: number; //bytes count
-    end: number; //bytes count
+    start: number; //seconds time
+    end: number; //seconds time
 
     get startTime() {
         return (
@@ -37,6 +37,12 @@ export class Bookmark {
     }
     isDecision():boolean {
         return this.type === AppConstants.bookmark.type.decision;
+    }
+
+    getPercentProgressFromTime(time:number) {
+        return (
+            (100 * ((time - this.start) / (this.end - this.start )))
+        );
     }
 
 }

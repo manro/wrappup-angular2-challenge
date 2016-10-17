@@ -26,14 +26,14 @@ export class ViewBookmarkComponent implements OnInit, OnDestroy {
 
             if (data.payload.bookmark_id === this.bookmark.id) {
                 if (data.action === 'update') {
-                    this.progress = data.payload.progress;
+                    this.progress =  this.bookmark.getPercentProgressFromTime(data.payload.time);
                 }
                 if (data.action === 'play') {
-                    this.progress = data.payload.progress;
+                    this.progress = this.bookmark.getPercentProgressFromTime(data.payload.time);
                     this.playing = true;
                 }
                 if (data.action === 'stop') {
-                    this.progress = data.payload.progress;
+                    this.progress = this.bookmark.getPercentProgressFromTime(data.payload.time);
                     this.playing = false;
                 }
             }
@@ -57,7 +57,6 @@ export class ViewBookmarkComponent implements OnInit, OnDestroy {
     isProcessed():boolean {
         return this._playingService.isProcessed();
     }
-
 
 
     private _playSub = null;
