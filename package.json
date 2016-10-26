@@ -10,15 +10,11 @@
     "build": "rimraf dist && webpack --progress --profile --bail",
     "__server": "webpack-dashboard -- webpack-dev-server --inline --port 7070",
     "server": "webpack-dev-server --inline --port 7070",
-    "webdriver-update": "webdriver-manager update",
-    "webdriver-start": "webdriver-manager start",
     "lint": "tslint --force \"src/**/*.ts\"",
     "pretest": "npm run lint",
-    "posttest": "remap-istanbul -i coverage/json/coverage-final.json -o coverage/html -t html",
     "docs": "typedoc --options typedoc.json src/app/app.component.ts",
     "start": "npm run server",
-    "start:hmr": "npm run server -- --hot",
-    "postinstall": "npm run webdriver-update"
+    "start:hmr": "npm run server -- --hot"
   },
   "dependencies": {
     "@angular/common": "2.0.0",
